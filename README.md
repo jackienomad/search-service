@@ -1,6 +1,6 @@
 # search-service
 ## DESCRIPTION
-Node.js project for IG&#x27;s search APIs
+Node.js search APIs
 
 <br/>
 
