@@ -1,0 +1,181 @@
+swagger: '2.0'
+info:
+  version: 2.0.0
+  title: ImportGenius Shipment Analytics API
+  description: Shipment Analytics
+  termsOfService: https://www.importgenius.com/terms
+  contact:
+    name: ImportGenius Developers
+    url: https://www.importgenius.com
+    email: dev@importgenius.com
+
+schemes:
+  - http
+host: importscan.ig.local
+
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+
+security:
+  - Bearer: []
+
+paths:
+  "/v2/{country}/{shipmentType}/shipments/analytics/{analyticsFields}":
+    get:
+      summary: "it depends on the field to show an graph"
+      parameters:
+        - $ref: '#/parameters/country'
+        - $ref: '#/parameters/analyticsFields'
+        - $ref: '#/parameters/shipmentType'
+        - $ref: '#/parameters/keywords'
+        - $ref: '#/parameters/include'
+        - $ref: '#/parameters/exclude'
+        - $ref: '#/parameters/arrivalDates'
+        - $ref: '#/parameters/sortBy'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/misc'
+
+      responses:
+        200:
+          description: ""
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                default: true
+                example: true
+              data:
+                type: array
+                items:
+                  type: object
+                example: [
+        {
+            "name": "consignee name",
+            "shipments_count": 1452,
+            "containers_count": 5126,
+            "gross_weight_kg": 128360051,
+            "gross_weight_lb": 282392112.20000005
+        }]
+
+
+parameters:
+
+  country:
+    name: country
+    in: path
+    required: true
+    type: string
+    description: Country where the search will be performed against
+    default: us
+    x-example: us
+
+  shipmentType:
+    name: shipmentType
+    in: path
+    required: true
+    type: string
+    description: Type of shipment to be searched
+    default: import
+
+  keywords:
+    name: keywords
+    in: query
+    required: true
+    description: The keyword to search for
+    type: array
+    items:
+      type: string
+    default:
+      - 'apple,and,fuzzy,Consignee'
+      - 'orange,or,regular,Consignee'
+      - 'banana,not,regular,Consignee'
+
+  arrivalDates:
+    name: arrivalDates
+    in: query
+    required: true
+    description: Date range of arrival
+    type: string
+    default: '1536192000-1536293000'
+    x-example: '1536192000-1536293000'
+
+  limit:
+    name: limit
+    in: query
+    required: true
+    type: integer
+    description: Records per page
+    default: 5
+    x-example: 5
+
+  sortBy:
+    name: sortBy
+    in: query
+    required: false
+    description: Fields for sorting for aggragated field
+    type: string
+    default: shipments_count
+    enum:
+      - containers_count
+      - weight_kg
+      - weight_lb
+      - shipments_count
+
+  include:
+    name: include
+    in: query
+    required: true
+    type: array
+    items:
+      type: string
+    default:
+      - 'CA,ConsigneeState'
+      - 'IRVINE,ConsigneeState'
+
+    x-example:
+      - 'CA,ConsigneeState'
+      - 'WA,ConsigneeState'
+
+  exclude:
+    name: include
+    in: query
+    required: true
+    type: array
+    items:
+      type: string
+    description: To be excluded in refinedBy
+    default:
+      - 'IRVINE,ConsigneeCity'
+
+  misc:
+    name: misc
+    in: query
+    required: true
+    type: array
+    description: Miscellaneous
+    items:
+      type: string
+    default:
+      - 'BlankConsigneesExcluded'
+    x-example:
+      - 'BlankConsigneesExcluded'
+
+  analyticsFields:
+    in: path
+    name: analyticsFields
+    required: true
+    type: string
+    default: consignees
+    enum:
+      - consignees
+      - states
+      - shippers
+      - us_ports
+      - foreign_ports
+      - origin_countries
+    description: fields to show
+

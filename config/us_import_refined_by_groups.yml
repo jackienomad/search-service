@@ -1,0 +1,39 @@
+Categories:
+  ConsigneeCity: Location
+  ConsigneeState: Location
+  ConsigneeZipCode: Location
+  ShipperAddress: Location
+  DestinationPort: Transit Details
+  ForeignPort: Transit Details
+  CountryOfOrigin: Transit Details
+  Shipper: ''
+  Consignee: ''
+  ConsigneeStreet: ''
+  NotifyPartyAddress: ''
+  NotifyParty: ''
+  MarksAndNumbers: ''
+  BlankConsigneesExcluded: 'Miscellaneous'
+  BlankShippersExcluded: 'Miscellaneous'
+  MasterShipmentsExcluded: 'Miscellaneous'
+  HouseShipmentsOnly: 'Miscellaneous'
+  MasterShipmentsOnly: 'Miscellaneous'
+DefaultGroups:
+  - ConsigneeCity
+  - ConsigneeState
+  - ConsigneeZipCode
+  - ShipperAddress
+  - DestinationPort
+  - ForeignPort
+  - CountryOfOrigin
+  - Shipper
+  - Consignee
+  - ConsigneeStreet
+  - NotifyPartyAddress
+  - NotifyParty
+  - MarksAndNumbers
+DefaultMiscGroups:
+  - BlankConsigneesExcluded
+  - BlankShippersExcluded
+  - MasterShipmentsExcluded
+  - HouseShipmentsOnly
+  - MasterShipmentsOnly

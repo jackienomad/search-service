@@ -1,0 +1,69 @@
+{
+  "name": "search-service",
+  "version": "1.0.0",
+  "description": "Node.js project for IG&#x27;s search APIs",
+  "main": "src/index.js",
+  "repository": "",
+  "author": "code-ninja",
+  "scripts": {
+    "test": "NODE_ENV=test NODE_CONFIG_DIR=./src/config/ node -r dotenv/config -r esm ./node_modules/.bin/jest test dotenv_config_path=.env.test --config=jest.config.json",
+    "test:focused": "NODE_ENV=test NODE_CONFIG_DIR=./src/config/ node -r dotenv/config -r esm ./node_modules/.bin/jest test/specs/endpoint/search/search.spec.js dotenv_config_path=.env.test --config=jest.config.json",
+    "test:rename": "NODE_ENV=test NODE_CONFIG_DIR=./src/config/ node -r dotenv/config -r esm ./node_modules/.bin/jest . dotenv_config_path=.env.test --config=jest.config.json; node scripts/renameReport.js",
+    "lint:fix": "eslint src test lib --fix",
+    "lint": "eslint src test lib",
+    "start": "NODE_ENV=production NODE_CONFIG_DIR=./src/config/ node -r dotenv/config -r module-alias/register -r esm src/index.js",
+    "dev": "NODE_ENV=development NODE_CONFIG_DIR=./src/config/ nodemon --watch src --exec 'node -r dotenv/config -r module-alias/register -r esm src/index.js'",
+    "debug": "NODE_ENV=development NODE_CONFIG_DIR=./src/config/ nodemon --watch src --exec 'node -r dotenv/config -r module-alias/register -r esm --inspect src/index.js'"
+  },
+  "_moduleAliases": {
+    "~": "./src",
+    "@": "./lib"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "config": "^2.0.1",
+    "cors": "^2.8.4",
+    "date-fns-timezone": "^0.1.4",
+    "dotenv": "^6.0.0",
+    "elasticsearch": "^15.1.1",
+    "esm": "^3.0.84",
+    "express": "^4.16.3",
+    "git": "^0.1.5",
+    "module-alias": "^2.1.0",
+    "query-builder": "git+ssh://git@gitlab.com:importgenius/microservices/query-builder.git#master"
+  },
+  "devDependencies": {
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
+    "eslint": "^5.6.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-prettier": "^3.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jest": "^21.22.1",
+    "eslint-plugin-prettier": "^3.0.0",
+    "faker": "^4.1.0",
+    "husky": "^1.1.2",
+    "jest": "^23.6.0",
+    "jest-stare": "^1.6.8",
+    "nodemon": "^1.18.4",
+    "prettier": "^1.14.3",
+    "supertest": "^3.3.0"
+  },
+  "engines": {
+    "node": ">= 8.11.x"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn lint",
+      "pre-push": "yarn test"
+    }
+  },
+  "jest-stare": {
+    "resultDir": "reports/latest",
+    "coverageLink": "./coverage/index.html",
+    "additionalResultsProcessors": []
+  },
+  "esm": {
+    "force": false,
+    "mode": "auto"
+  }
+}

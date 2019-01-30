@@ -1,0 +1,1035 @@
+swagger: '2.0'
+info:
+  version: 2.0.0
+  title: ImportGenius Company Profile API
+  description: Collection of APIs related to the Company Profile for the ImportGenius Project
+  termsOfService: https://www.importgenius.com/terms
+  contact:
+    name: ImportGenius Developers
+    url: https://www.importgenius.com
+    email: dev@importgenius.com 
+
+schemes:
+  - http
+host: importscan.ig.local
+
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+
+# Applies Bearer auth to the whole api
+security:
+  - Bearer: []
+
+tags:
+  - name: importgenius
+    description: APIs used by the ImportGenius project
+
+
+paths:
+  # array of shipments under shipper, consignee, internal
+  /v2/{country}/{shipmentType}/companies/{companyId}/shipments:
+    parameters: 
+      - $ref: '#/parameters/country'
+      - $ref: '#/parameters/shipmentType'
+      - $ref: '#/parameters/companyId'
+      
+    get:
+      summary: Consolidated fetch shipments endpoint
+      description: Endpoint for fetching shipments with various options
+      tags: 
+        - importgenius
+        
+      parameters:
+        - $ref: '#/parameters/arrivalDates'
+        - $ref: '#/parameters/timezone'
+        - $ref: '#/parameters/interval'
+        - $ref: '#/parameters/traderTypes'
+        - $ref: '#/parameters/size'
+          
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                default: true
+                example: true
+                x-example: true
+
+              country:
+                type: string
+                default: us
+                example: us
+                x-example: us
+                
+              shipmentType:
+                type: string
+                default: import
+                example: import
+                x-example: import
+
+              arrivalDates:
+                type: array
+                items:
+                  type: string
+                default:
+                  - '1536192000-1536293000'
+                  - '1546192000'
+                example:
+                  - '1536192000-1536293000'
+                  - '1546192000'
+                x-example:
+                  - '1536192000-1536293000'
+                  - '1546192000'
+
+              traderTypes:
+                type: array
+                items:
+                  type: string
+                  enum:
+                    - consignee
+                    - shipper
+                    - internal
+                default:
+                  - internal
+                example:
+                  - internal
+                x-example:
+                  - internal
+
+              interval:
+                type: string
+                enum:
+                  - days
+                  - weeks
+                  - months
+                  - years
+                default: weeks
+                x-example: weeks
+
+              timezone:
+                type: string
+                default: America/Los_Angeles
+                x-example: America/Los_Angeles
+
+              size:
+                type: integer
+                default: 10
+                x-example: 10
+
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/IntervalSchema'
+  
+  /v1/{country}/{shipmentType}/company/{companyId}/get_shipper_shipment_counts:
+    parameters: 
+      - $ref: '#/parameters/country'
+      - $ref: '#/parameters/shipmentType'
+      - $ref: '#/parameters/companyId'
+    
+    post:
+      deprecated: true
+      summary: Get shipper's shipment counts
+      description: Endpoint for fetching a shipper's shipment counts
+      tags: 
+        - importgenius
+        
+      parameters:
+        - $ref: '#/parameters/arrivalDateBetween'
+        - $ref: '#/parameters/timezone'
+        - $ref: '#/parameters/interval'
+      
+      responses:
+        200:
+          $ref: '#/responses/SuccessfulShipmentCountResponse'
+        400:
+          $ref: '#/responses/FailedResponse'
+
+  /v1/{country}/{shipmentType}/company/{companyId}/get_consignee_shipment_counts:
+    parameters: 
+      - $ref: '#/parameters/country'
+      - $ref: '#/parameters/shipmentType'
+      - $ref: '#/parameters/companyId'
+    
+    post:
+      deprecated: true
+      summary: Get consignee's shipment counts
+      description: Endpoint for fetching a shipper's shipment counts
+      tags: 
+        - importgenius
+        
+      parameters:
+        - $ref: '#/parameters/arrivalDateBetween'
+        - $ref: '#/parameters/timezone'
+        - $ref: '#/parameters/interval'
+      
+      responses:
+        200:
+          $ref: '#/responses/SuccessfulShipmentCountResponse'
+        400:
+          $ref: '#/responses/FailedResponse'
+
+  /v1/{country}/{shipmentType}/company/{companyId}/get_internal_shipment_counts:
+    parameters: 
+      - $ref: '#/parameters/country'
+      - $ref: '#/parameters/shipmentType'
+      - $ref: '#/parameters/companyId'
+    
+    post:
+      deprecated: true
+      summary: Get internal shipment counts
+      description: Endpoint for fetching a shipper's shipment counts
+      tags: 
+        - importgenius
+        
+      parameters:
+        - $ref: '#/parameters/arrivalDateBetween'
+        - $ref: '#/parameters/timezone'
+        - $ref: '#/parameters/interval'
+      
+      responses:
+        200:
+          $ref: '#/responses/SuccessfulShipmentCountResponse'
+        400:
+          $ref: '#/responses/FailedResponse'
+  
+  /v1/{country}/{shipmentType}/company/{companyId}/get_all_shipments_as_shipper:
+    parameters: 
+      - $ref: '#/parameters/country'
+      - $ref: '#/parameters/shipmentType'
+      - $ref: '#/parameters/companyId'
+    
+    post:
+      deprecated: true
+      summary: Get all shipments of a shipper
+      description: Endpoint for fetching a shipper's shipment counts
+      tags: 
+        - importgenius
+        
+      parameters:
+        - $ref: '#/parameters/arrivalDateBetween'
+        - $ref: '#/parameters/pageNumber'
+        - $ref: '#/parameters/recordsPerPage'
+        - $ref: '#/parameters/sortResultBy'
+        
+      responses:
+        200:
+          $ref: '#/responses/SuccessfulShipmentResponse'
+        400:
+          $ref: '#/responses/FailedResponse'
+  
+  /v1/{country}/{shipmentType}/company/{companyId}/get_all_shipments_as_consignee:
+    parameters: 
+      - $ref: '#/parameters/country'
+      - $ref: '#/parameters/shipmentType'
+      - $ref: '#/parameters/companyId'
+
+    post:
+      deprecated: true
+      summary: Get all shipments of a shipper
+      description: Endpoint for fetching a shipper's shipment counts
+      tags: 
+        - importgenius
+
+      parameters:
+        - $ref: '#/parameters/arrivalDateBetween'
+        - $ref: '#/parameters/pageNumber'
+        - $ref: '#/parameters/recordsPerPage'
+        - $ref: '#/parameters/sortResultBy'
+
+      responses:
+        200:
+          $ref: '#/responses/SuccessfulShipmentResponse'
+        400:
+          $ref: '#/responses/FailedResponse'
+
+  /v1/{country}/{shipmentType}/company/{companyId}/get_all_internal_shipments:
+    parameters: 
+      - $ref: '#/parameters/country'
+      - $ref: '#/parameters/shipmentType'
+      - $ref: '#/parameters/companyId'
+    
+    post:
+      deprecated: true
+      summary: Get all shipments of a shipper
+      description: Endpoint for fetching a shipper's shipment counts
+      tags: 
+        - importgenius
+        
+      parameters:
+        - $ref: '#/parameters/arrivalDateBetween'
+        - $ref: '#/parameters/pageNumber'
+        - $ref: '#/parameters/recordsPerPage'
+        - $ref: '#/parameters/sortResultBy'
+        
+      responses:
+        200:
+          $ref: '#/responses/SuccessfulShipmentResponse'
+        400:
+          $ref: '#/responses/FailedResponse'
+
+
+parameters:
+  companyId:
+    name: companyId
+    in: path
+    required: true
+    type: string
+    description: Identifier string for a company
+    pattern: '^/A-Za-z0-9/{32}$'
+    default: 32lengthsamplecompanyidfillerabc
+    x-example: 32lengthsamplecompanyidfillerabc
+
+  country:
+    name: country
+    in: path
+    required: true
+    type: string
+    description: Country where the search will be performed against
+    default: us
+    x-example: us
+  
+  shipmentType:
+    name: shipmentType
+    in: path
+    required: true
+    type: string
+    description: Type of shipment to be searched
+    default: import
+    x-example: import
+    
+  traderTypes:
+    in: query
+    name: traderTypes
+    required: false
+    type: array
+    items:
+      type: string
+      enum:
+        - shipper
+        - consignee
+        - internal
+    default:
+      - internal
+    x-example:
+      - internal
+
+  size:
+    in: query
+    name: size
+    required: true
+    type: integer
+    default: 10
+    x-example: 10
+
+  interval:
+    name: interval
+    in: body
+    description: Interval to group data into
+    required: true
+    schema:
+      type: string
+      default: weeks
+      example: weeks
+      x-example: weeks
+      enum:
+        - days
+        - weeks
+        - months
+        - years
+
+  pageNumber:
+    name: pageNumber
+    in: body
+    description: Page to load
+    required: false
+    schema:
+      type: integer
+      default: 1
+      example: 1
+      x-example: 1
+
+  recordsPerPage:
+    name: recordsPerPage
+    in: body
+    description: Number of records per page
+    required: false
+    schema:
+      type: integer
+      default: 20
+      example: 20
+      x-example: 20
+
+  timezone:
+    name: timezone
+    in: body
+    description: Timezone to be used for the computations. Acccepted values are in https://timezonedb.com/time-zones
+    required: true
+    schema:
+      type: string
+      default: America/Los_Angeles
+      example: America/Los_Angeles
+      x-example: America/Los_Angeles
+
+  sortResultBy:
+    name: sortResultBy
+    in: body
+    description: Sorting fields to use
+    required: false
+    schema:
+      type: array
+      items:
+        type: string
+      default:
+        - field1
+        - field2
+      example:
+        - field1
+        - field2
+      x-example:
+        - field1
+        - field2
+        
+  arrivalDates:
+    name: arrivalDates
+    in: query
+    required: true
+    description: Date range of arrival
+    type: string
+    default: '1536192000-1536293000'
+    x-example: '1536192000-1536293000'
+
+  arrivalDateBetween:
+    name: arrivalDateBetween
+    in: body
+    description: Date of arrival filter
+    required: true
+    schema:
+      type: object
+      properties:
+        from:
+          type: integer
+          default: 1536192000
+          example: 1536192000
+          x-example: 1536192000
+        to:
+          type: integer
+          default: 1536192000
+          example: 1536192000
+          x-example: 1536192000
+
+responses:
+  FailedResponse:
+    description: An error was encountered
+    schema:
+      $ref: '#/definitions/FailedResponseSchema'
+      
+  SuccessfulShipmentCountResponse:
+    description: Successfully fetched shipment counts
+    schema:
+      $ref: '#/definitions/SuccessfulShipmentCountSchema'
+      
+  SuccessfulShipmentResponse:
+    description: Succesful fetch of shipments
+    schema:
+      $ref: '#/definitions/SuccessfulShipmentFetchSchema'
+
+
+definitions:
+  FailedResponseSchema:
+    type: object
+    properties:
+      success:
+        type: boolean
+        default: false
+        example: false
+
+      reason:
+        type: string
+        default: 'An error has occured'
+        example: 'An error has occured'
+
+  SuccessfulShipmentCountSchema:
+    type: object
+    properties:
+      success:
+        type: boolean
+        default: true
+        example: true
+
+      country:
+        type: string
+        default: us
+        example: us
+
+      shipmentType:
+        type: string
+        default: import
+        example: import
+
+      interval:
+        type: string
+        default: weeks
+        example: weeks
+
+      timezone:
+        type: string
+        default: 'Asia/Manila'
+        example: 'Asia/Manila'
+
+      shipments:
+        type: array
+        items:
+          $ref: '#/definitions/CountSchema'
+
+  CountSchema:
+    type: object
+    properties:
+      from:
+        type: integer
+        default: 1534608000
+        example: 1534608000
+
+      to:
+        type: integer
+        default: 1535212799
+        example: 1535212799
+
+      count:
+        type: integer
+        default: 20
+        example: 20
+        
+  SuccessfulShipmentFetchSchema:
+    type: object
+    properties:
+      success:
+        type: boolean
+        default: true
+        example: true
+
+      searchId:
+        type: string
+        pattern: '^[0-9A-Za-z]{13}$'
+        default: 5819fa0b712bb
+        example: 5819fa0b712bb
+
+      elapsed:
+        type: integer
+        default: 10
+        example: 10
+
+      origin: 
+        type: string
+        default: 'Elastic Search Shipments Dataset'
+        example: 'Elastic Search Shipments Dataset'
+
+      page:
+        type: string
+        default: '0'
+        example: '0'
+
+      limit:
+        type: string
+        default: '20'
+        example: '20'
+
+      totalShipments:
+        type: integer
+        default: 0
+        example: 0
+
+      data:
+        type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/definitions/ShipmentSchema'
+                  
+  CargoSchema:
+    type: object
+    properties:
+      Keywords:
+        type: array
+        items:
+          type: string
+        default:
+          - red apple
+        example:
+          - red apple
+
+      HS Code:
+        type: string
+        default: HS Code 8888 4444
+        example: HS Code 8888 4444
+      
+      Piece Count:
+        type: string
+        default: '8888'
+        example: '8888'
+        
+      Description:
+        type: string
+        default: 8888PCS OF RED APPLE REFNO APAI88888 HS CODE 88884444888844448888444488 TS CARGO FROM CHINA TO UNITED STATES VIA HONG KONG BY TRUCK
+        example: 8888PCS OF RED APPLE REFNO APAI88888 HS CODE 88884444888844448888444488 TS CARGO FROM CHINA TO UNITED STATES VIA HONG KONG BY TRUCK
+        
+  ContainerSchema:
+    type: object
+    properties:
+      'Seal Numbers':
+        type: array
+        items:
+          type: string
+          default: ABCDEF12345
+          example: ABCDEF12345
+          
+      Cargoes:
+        type: array
+        items:
+          $ref: '#/definitions/CargoSchema'
+          
+      Width:
+        type: string # why not number?
+        default: '888'
+        example: '888'
+        
+      Length:
+        type: string # why not number?
+        default: '4444'
+        example: '4444'
+        
+      Equipment Description:
+        type: string
+        default: '00'
+        example: '00'
+        
+      Marks:
+        type: array
+        items:
+          type: string
+        default:
+          - APPLEMTJULIETPALLET NO 88884444CARTON NO88884444REFNO APAI888844ORIGIN MADE IN CHINA. .
+        example:
+          - APPLEMTJULIETPALLET NO 88884444CARTON NO88884444REFNO APAI888844ORIGIN MADE IN CHINA. .
+  
+      Type:
+        type: string
+        default: 40 Foot General Purpose Container, Openings at one or both ends
+        example: 40 Foot General Purpose Container, Openings at one or both ends
+        
+      Load Status:
+        type: string
+        default: Loaded
+        example: Loaded
+      
+      Type Of Service:
+        type: string
+        default: Container Yard
+        example: Container Yard
+        
+      Height:
+        type: string # why not number
+        default: '888'
+        example: '888'
+        
+      Container Number:
+        type: string
+        default: ABCD1234567
+        example: ABCD1234567
+        
+  ConsigneeAddressBreakdownSchema:
+    type: object
+    properties:
+      StreetNamePostType:
+        type: string
+        default: MT
+        example: MT
+
+      PlaceName:
+        type: string
+        default: SAMPLE PLACE
+        example: SAMPLE PLACE
+
+      StateName:
+        type: string
+        default: AZ
+        example: AZ
+
+      ZipCode:
+        type: string # why not number
+        default: '88888'
+        example: '88888'
+
+      CountryName:
+        type: string
+        default: US
+        example: US
+
+      AddressNumber:
+        type: string # why not number
+        default: '888'
+        example: '888'
+
+      StreetName:
+        type: string
+        default: SAMPLE STREET
+        example: SAMPLE STREET
+
+  ShipmentSchema:
+    type: object
+    properties:
+      VesselName:
+        type: string
+        default: MV CARGO
+        example: MV CARGO
+
+      CountryOfOrigin:
+        type: string
+        default: CN
+        example: CN
+
+      QuantityUnit:
+        type: string
+        default: CTN
+        example: CTN
+
+      VoyageNumber:
+        type: string
+        default: 888A
+        example: 888A
+
+      Containers:
+        type: array
+        items:
+          $ref: '#/definitions/ContainerSchema'
+
+      SealNumbers:
+        type: array
+        items:
+          type: string
+        default:
+          - ABC888888D
+        example:
+          - ABC888888D
+
+      ProductKeywords:
+        type: array
+        items:
+          type: string
+        default:
+          - red apple
+        example:
+          - red apple
+
+      HSCode:
+        type: array
+        items:
+          type: string
+        default:
+          - HS Code 8888 8888
+        example:
+          - HS Code 8888 8888
+
+      ProductDescription:
+        type: array
+        items:
+          type: string
+        default:
+          - 8888PCS OF RED APPLE REFNO APAI88888 HS CODE 88884444888844448888444488 TS CARGO FROM CHINA TO UNITED STATES VIA HONG KONG BY TRUCK
+        example:
+          - 8888PCS OF RED APPLE REFNO APAI88888 HS CODE 88884444888844448888444488 TS CARGO FROM CHINA TO UNITED STATES VIA HONG KONG BY TRUCK
+
+      ContainerWidth:
+        type: array
+        items:
+          type: string # why not number
+        default:
+          - '888'
+        example:
+          - '888'
+
+      ContainerLength:
+        type: array
+        items:
+          type: string # why not number
+        default:
+          - '4444'
+        example:
+          - '4444'
+
+      EquipmentDescriptionCode:
+        type: array
+        items:
+          type: string
+        default:
+          - '00'
+        example:
+          - '00'
+
+      MarksAndNumbers:
+        type: array
+        items:
+          type: string
+        default:
+          - APPLEMTJULIETPALLET NO 88884444CARTON NO88884444REFNO APAI888844ORIGIN MADE IN CHINA. .
+        example:
+          - APPLEMTJULIETPALLET NO 88884444CARTON NO88884444REFNO APAI888844ORIGIN MADE IN CHINA. .
+
+      ContainerType:
+        type: array
+        items:
+          type: string
+        default:
+          - 40 Foot General Purpose Container, Openings at one or both ends
+        example:
+          - 40 Foot General Purpose Container, Openings at one or both ends
+
+      LoadStatus:
+        type: array
+        items:
+          type: string
+        default:
+          - Loaded
+        example:
+          - Loaded
+
+      ContainerHeight:
+        type: array
+        items:
+          type: string # why not number
+        default:
+          - '888'
+        example:
+          - '888'
+
+      ContainerNumber:
+        type: array
+        items:
+          type: string
+        default:
+          - ABCD8888888
+        example:
+          - ABCD8888888
+
+      ArrivalDate:
+        type: string # why not number
+        default: '1533723200'
+        example: '1533723200'
+
+      DistributionPort:
+        type: string
+        default: ''
+        example: ''
+
+      PlaceOfReceipt:
+        type: string
+        default: US
+        example: US
+
+      MasterBillOfLading:
+        type: string
+        default: ABCDEFGHI8888888
+        example: ABCDEFGHI8888888
+
+      InBondEntryType:
+        type: string
+        default: ''
+        example: ''
+
+      ShipperId:
+        type: string
+        default: abcdefghijklmnop123456781234678
+        example: abcdefghijklmnop123456781234678
+
+      Shipper:
+        type: string
+        default: IMPORT GENIUS SHIPMENT CO
+        example: IMPORT GENIUS SHIPMENT CO
+
+      ShipperAddress:
+        type: string
+        default: 888 MT SAMPLE STREET SAMPLE PLACE AZ US 88888
+        example: 888 MT SAMPLE STREET SAMPLE PLACE AZ US 88888
+
+      ForeignPort:
+        type: string
+        default: United States
+        example: United States
+
+      Quantity:
+        type: string # why not number
+        default: '8888'
+        example: '8888'
+
+      BillOfLading:
+        type: string
+        default: ABCDABCDAB888888
+        example: ABCDABCDAB888888
+
+      CarrierCity:
+        type: string
+        default: PHOENIX
+        example: PHOENIX
+
+      CarrierCode:
+        type: string
+        default: ABCD
+        example: ABCD
+
+      CarrierName:
+        type: string
+        default: FEDEX TRADE NETWORKS TRANSPORT & BROKERAGE INC
+        example: FEDEX TRADE NETWORKS TRANSPORT & BROKERAGE INC
+
+      CarrierZip:
+        type: string # why not number
+        default: '88888'
+        example: '88888'
+
+      CarrierState:
+        type: string
+        default: NY
+        example: NY
+
+      CarrierAddress:
+        type: string
+        default: 888 SAMPLE STREET
+        example: 888 SAMPLE STREET
+
+      ManifestNumber:
+        type: string
+        default: '888888'
+        example: '888888'
+
+      NumberOfContainers:
+        type: string # why not number
+        default: '1'
+        example: '1'
+
+      BillTypeCode:
+        type: string
+        default: House Bill
+        example: House Bill
+
+      GrossWeightKgs:
+        type: string
+        default: '4444'
+        example: '4444'
+
+      MeasurementUnit:
+        type: string
+        default: 'X'
+        example: 'X'
+
+      ConsigneeAddressBreakdown:
+        $ref: '#/definitions/ConsigneeAddressBreakdownSchema'
+
+      ConsigneeCity:
+        type: string
+        default: PHOENIX
+        example: PHOENIX
+
+      ConsigneeState:
+        type: string
+        default: TN
+        example: TN
+
+      ConsigneeZipCode:
+        type: string # why not number
+        default: '88888'
+        example: '88888'
+
+      ConsigneeStreetNumber:
+        type: string # why not number
+        default: '888'
+        example: '888'
+
+      ConsigneeStreet:
+        type: string
+        default: SAMPLE STREET
+        example: SAMPLE STREET
+
+      ConsigneeId:
+        type: string
+        default: 28a79d28abfe3f78fed5f541e9e28a6d
+        example: 28a79d28abfe3f78fed5f541e9e28a6d
+
+      Consignee:
+        type: string
+        default: IMPORT GENIUS LTD
+        example: IMPORT GENIUS LTD
+
+      ConsigneeAddress:
+        type: string
+        default: 888 MT SAMPLE STREET SAMPLE PLACE AZ US 88888
+        example: 888 MT SAMPLE STREET SAMPLE PLACE AZ US 88888
+
+      Measurement:
+        type: string
+        default: 20
+        example: 20
+
+      DestinationPort:
+        type: string
+        default: Los Angeles, California
+        example: Los Angeles, California
+
+      GrossWeightLbs:
+        type: string # why not number
+        default: '8888'
+        example: '8888'
+
+      ShipmentId:
+        type: string
+        default: 26294dea00735cb3b23a3aa48c824249
+        example: 26294dea00735cb3b23a3aa48c824249
+
+      NotifyParty:
+        type: string
+        default: ''
+        example: ''
+
+      NotifyPartyAddress:
+        type: string
+        default: ''
+        example: ''
+
+      TypeOfService:
+        type: string
+        default: ''
+        example: ''
+        
+  IntervalSchema:
+    type: object
+    properties:
+      to:
+        type: integer
+        default: e
+        x-example: 1535817600
+      from:
+        type: integer
+        default: 1535817600
+        x-example: 1535817600
+      totalShipments:
+        type: integer
+        default: 0
+        x-example: 0
+      traderType:
+        type: string
+        enum:
+          - consignee
+          - shipper
+          - internal
+        default: consignee
+        example: consignee
+      items:
+        type: array
+        items:
+          $ref: '#/definitions/ShipmentSchema'

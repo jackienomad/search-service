@@ -1,0 +1,91 @@
+stages:
+  - build_and_test
+  - build_prod
+  - deploy
+
+image: node:8.11.4
+
+build_and_test:
+  #services:
+  #  - elasticsearch:5.3
+  stage: build_and_test
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
+  before_script:
+    - mkdir -p ~/.ssh
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+    - echo "$GITLAB_DEPLOY_PRIVATE_KEY" >> ~/.ssh/id_rsa && chmod 0600 ~/.ssh/id_rsa
+    - bash lib/gitlab-install-yarn.sh > /dev/null 2>&1
+    - cp .env.dist .env.test
+    - export ES_TEST=test
+    - sed -i "s/127.0.0.1/$ES_TEST/g" .env.test
+    - yarn
+  script:
+    - echo "yarn test"
+  except:
+    - master
+    - tags
+
+deploy_to_scrum_m31:
+  stage: deploy
+  variables:
+    GIT_STRATEGY: none
+  before_script:
+    - mkdir -p ~/.ssh
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+    - echo "$GITLAB_DEPLOY_PRIVATE_KEY" >> ~/.ssh/id_rsa && chmod 0600 ~/.ssh/id_rsa
+  script:
+    - ssh scrum@$IG_DEV_HOST -t -t "cd ~/$SEARCH_SERVICE_DEV_PATH &&
+      git checkout master &&
+      git pull &&
+      yarn &&
+      pm2 reload search-service"
+  environment:
+    name: master-m31
+    url: http://search-api.m31.importgenius.com
+  only:
+    - master
+
+build_prod:
+  stage: build_prod
+  before_script:
+    - mkdir -p ~/.ssh
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+    - echo "$GITLAB_DEPLOY_PRIVATE_KEY" >> ~/.ssh/id_rsa && chmod 0600 ~/.ssh/id_rsa
+    - bash lib/gitlab-install-yarn.sh > /dev/null 2>&1
+    - cp .env.dist .env
+    - sed -i "s/127.0.0.1/$ES_PROD/g" .env
+    - yarn
+  script:
+    - git archive --output=package.tar HEAD
+    - tar --exclude=.git/ -uf package.tar node_modules/ .env
+    - mkdir -p latest && gzip -c package.tar > latest/package.tgz && rm package.tar
+  artifacts:
+    name: $CI_JOB_NAME_$CI_COMMIT_REF_NAME
+    expire_in: 10 mins
+    paths:
+      - latest/package.tgz
+  only:
+    - tags
+  except:
+    - branches
+
+deploy_to_prod:
+  image: mikesir87/aws-cli:latest
+  stage: deploy
+  variables:
+    GIT_STRATEGY: none
+    S3_BUCKET_NAME: ig-codedeploy
+  script:
+    - aws s3 cp latest/package.tgz s3://$S3_BUCKET_NAME/search-api/
+  dependencies:
+    - build_prod
+  environment:
+    name: production
+    url: https://search-api.importgenius.com
+  only:
+    - tags
+  except:
+    - branches

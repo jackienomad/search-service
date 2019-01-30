@@ -1,0 +1,804 @@
+swagger: '2.0'
+info:
+  version: 2.0.0
+  title: ImportGenius Search API
+  description: Collection of APIs related to Search for the ImportGenius Project
+  termsOfService: https://www.importgenius.com/terms
+  contact:
+    name: ImportGenius Developers
+    url: https://www.importgenius.com
+    email: dev@importgenius.com
+
+tags:
+  - name: importgenius
+    description: APIs used by the ImportGenius project
+
+paths:
+  /{country}/{shipmentType}/shipments/suggested/fields:
+    parameters:
+      - $ref: '#/parameters/country'
+      - $ref: '#/parameters/shipmentType'
+
+    get:
+      summary: Search suggested fields
+      description: Endpoint for fetching suggested fields for search
+      tags:
+        - importgenius
+
+      parameters:
+        - $ref: '#/parameters/keyword'
+        - $ref: '#/parameters/arrivalDates'
+
+      responses:
+        200:
+          description: Successfully fetched list of suggested fields
+          schema:
+            properties:
+              success:
+                type: boolean
+              data:
+                type: array
+                items:
+                  type: string
+                default:
+                  - ProductKeywords
+                  - Consignee
+                  - Shipper
+                  - MarksAndNumbers
+                example:
+                  - ProductKeywords
+                  - Consignee
+                  - Shipper
+                  - MarksAndNumbers
+
+  /v2/{country}/{shipmentType}/shipments/search/refinements':
+    get:
+      summary: Refinements endpoint with Multi Search support
+      description: Refinements endpoint with Multi Search support
+      tags:
+        - importscan
+
+      parameters:
+        - $ref: '#/parameters/country'
+        - $ref: '#/parameters/shipmentType'
+        - in: query
+          name: fields
+          type: array
+          items:
+            type: string
+            enum:
+              - All
+              - ConsigneeCity
+              - ConsigneeState
+              - ConsigneeZipCode
+              - ShipperAddress
+              - DestinationPort
+              - ForeignPort
+              - CountryOfOrigin
+              - Shipper
+              - Consignee
+              - ConsigneeStreet
+              - NotifyPartyAddress
+              - NotifyParty
+              - MarksAndNumbers
+          description: Array of fields for aggregation
+        - in: query
+          name: keywords
+          type: array
+          items:
+            type: string
+          description: Comma-separated
+            example "apple,and,fuzzy,Consignee"
+        - in: query
+          name: misc
+          type: string
+          description: Comma-separated
+            example "BlankConsigneesExcluded,MasterShipmentsExcluded"
+          default: BlankConsigneesExcluded
+          enum:
+            - BlankConsigneesExcluded
+            - MasterShipmentsExcluded
+            - HouseShipmentsOnly
+            - MasterShipmentsOnly
+        - $ref: '#/parameters/arrivalDates'
+        - in: query
+          name: include
+          type: array
+          items:
+            type: string
+          description: Comma-separated
+            example "CA,ConsigneeState"
+        - in: query
+          name: exclude
+          type: array
+          items:
+            type: string
+          description: Comma-separated
+            example "IRVINE,ConsigneeCity"
+
+      responses:
+        200:
+          description: Successful fetching of Aggregations
+          schema:
+            $ref: '#/definitions/AggregateResponse'
+
+  /{country}/{shipmentType}/shipments/suggested/keywords:
+    parameters:
+      - $ref: '#/parameters/country'
+      - $ref: '#/parameters/shipmentType'
+
+    get:
+      summary: Suggested keywords
+      description: Suggested keywords
+      tags:
+        - importgenius
+      parameters:
+        - $ref: '#/parameters/fields'
+        - $ref: '#/parameters/keyword'
+        - $ref: '#/parameters/arrivalDates'
+
+      responses:
+        200:
+          description: Successfully fetched suggested keywords
+          schema:
+            properties:
+              success:
+                type: boolean
+                default: true
+                x-example: true
+              data:
+                type: object
+                properties:
+                  'SearchField1':
+                    type: array
+                    items:
+                      $ref: '#/definitions/SuggestedKeyword'
+                additionalProperties:
+                  type: array
+                  items:
+                    $ref: '#/definitions/SuggestedKeyword'
+
+  /{country}/{shipmentType}/shipment/search:
+    parameters:
+      - $ref: '#/parameters/country'
+      - $ref: '#/parameters/shipmentType'
+
+    get:
+      summary: Shipment Search
+      description: Endpoint for fetching search results from Elastic Search
+      tags:
+        - importgenius
+      parameters:
+        - $ref: '#/parameters/keywords'
+        - $ref: '#/parameters/page'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/arrivalDates'
+        - $ref: '#/parameters/sortBy'
+        - $ref: '#/parameters/include'
+        - $ref: '#/parameters/exclude'
+        - $ref: '#/parameters/misc'
+
+      responses:
+        200:
+          description: Successfully fetched shipments
+          schema:
+            $ref: '#/definitions/SearchResponse'
+
+  /{country}/{shipmentType}/shipments/summary:
+    parameters:
+      - $ref: '#/parameters/country'
+      - $ref: '#/parameters/shipmentType'
+
+    get:
+      summary: Shipment Summary
+      description: Endpoint for fetching summary of search results from Elastic Search
+      tags:
+        - importgenius
+      parameters:
+        - $ref: '#/parameters/scale'
+        - $ref: '#/parameters/timezone'
+        - $ref: '#/parameters/arrivalDates'
+        - $ref: '#/parameters/keywords'
+        - $ref: '#/parameters/include'
+        - $ref: '#/parameters/exclude'
+        - $ref: '#/parameters/misc'
+
+      responses:
+        200:
+          description: Successfully fetched shipment summary
+          schema:
+            properties:
+              success:
+                type: boolean
+                default: true
+                x-example: true
+              total:
+                $ref: '#/definitions/SummaryTotal'
+              items:
+                $ref: '#/definitions/SummaryItems'
+
+parameters:
+  country:
+    name: country
+    in: path
+    required: true
+    type: string
+    description: Country where the search will be performed against
+    default: us
+    x-example: us
+
+  shipmentType:
+    name: shipmentType
+    in: path
+    required: true
+    type: string
+    description: Type of shipment to be searched
+    default: import
+    x-example: import
+
+  keyword:
+    name: keyword
+    in: query
+    required: true
+    description: The keyword to search for
+    type: string
+    default: apple
+    x-example: apple
+
+  arrivalDates:
+    name: arrivalDates
+    in: query
+    required: true
+    description: Date range of arrival
+    type: string
+    default: '1536192000-1536293000'
+    x-example: '1536192000-1536293000'
+
+  fields:
+    name: fields
+    in: query
+    required: true
+    type: array
+    items:
+      type: string
+    default:
+      - MarksAndNumbers
+      - Shipper
+      - Consignee
+    x-example:
+      - MarksAndNumbers
+      - Shipper
+      - Consignee
+
+  searchBody:
+    name: body
+    in: body
+    required: true
+    schema:
+      $ref: '#/definitions/SearchBody'
+
+  keywords:
+    name: keyword
+    in: query
+    required: true
+    description: The keyword to search for
+    type: array
+    items:
+      type: string
+    default:
+      - 'potato barn,and,fuzzy,Consignee'
+    x-example:
+      - 'potato barn,and,fuzzy,Consignee'
+
+  page:
+    name: page
+    in: query
+    required: true
+    type: integer
+    description: Page number
+    default: 1
+    x-example: 1
+
+  limit:
+    name: limit
+    in: query
+    required: true
+    type: integer
+    description: Records per page
+    default: 20
+    x-example: 20
+
+  sortBy:
+    name: sortBy
+    in: query
+    required: false
+    description: Fields for sorting
+    type: string
+    default: 'Shipper'
+    x-example: 'Shipper'
+
+  include:
+    name: include
+    in: query
+    required: false
+    description: To be included in refinedBy
+    type: array
+    items:
+      type: string
+    default:
+      - 'CA,ConsigneeState'
+    x-example:
+      - 'CA,ConsigneeState'
+
+  exclude:
+    name: exclude
+    in: query
+    required: false
+    description: To be excluded in refinedBy
+    type: array
+    items:
+      type: string
+    default:
+      - 'IRVINE,ConsigneeCity'
+    x-example:
+      - 'IRVINE,ConsigneeCity'
+
+  misc:
+    name: misc
+    in: query
+    required: false
+    type: array
+    description: Miscellaneous
+    items:
+      type: string
+    default:
+      - 'BlankConsigneesExcluded'
+    x-example:
+      - 'BlankConsigneesExcluded'
+
+  scale:
+    name: scale
+    in: query
+    required: true
+    description: Range scale for line graph
+    type: string
+    default: 'months'
+    x-example: 'months'
+
+  timezone:
+    name: timezone
+    in: query
+    required: true
+    description: Current timezone of user
+    type: string
+    default: 'Asia/Manila'
+    x-example: 'Asia/Manila'
+
+definitions:
+  SuggestedKeyword:
+    description: Suggested Search keywords
+    type: object
+    properties:
+      keyword:
+        type: string
+        default: keyword goes here
+        example: keyword goes here
+      type:
+        type: string
+        default: query
+        example: query
+      search_field:
+        type: string
+        default: search field goes here
+        example: search field goes here
+
+  SearchKeyword:
+    description: The keyword to search
+    type: string
+    default: apple
+    example: apple
+
+  ArrivalDate:
+    description: Date range of arrival
+    type: object
+    properties:
+      start:
+        type: integer
+        default: 1536192000
+        example: 1536192000
+      end:
+        type: integer
+        default: 1536192000
+        example: 1536192000
+
+  SearchBody:
+    description: Combination of search keywords and filters
+    type: object
+    properties:
+      keyword:
+        $ref: '#/definitions/SearchKeyword'
+      arrivalDate:
+        $ref: '#/definitions/ArrivalDate'
+
+  SearchResponse:
+    type: object
+    description: Response object returned by the APIs
+    required:
+      - success
+    properties:
+      success:
+        type: boolean
+        description: Indicates if the search was successful or not
+        default: true
+        example: true
+      total:
+        type: integer
+        description: Total number of returned search results
+        default: 100
+        example: 100
+      params:
+        type: object
+        description: The search query object
+        properties:
+          country:
+            type: string
+            default: 'us'
+            example: 'us'
+          shipmentType:
+            type: string
+            default: 'import'
+            example: 'import'
+          keywords:
+            type: array
+            items:
+              type: object
+              properties:
+                keyword:
+                  type: string
+                  default: 'potato barn'
+                  example: 'potato barn'
+                operator:
+                  type: string
+                  default: 'and'
+                  example: 'and'
+                type:
+                  type: string
+                  default: 'fuzzy'
+                  example: 'fuzzy'
+                field:
+                  type: string
+                  default: 'Consignee'
+                  example: 'Consignee'
+          include:
+            type: array
+            items:
+              type: object
+              properties:
+                keyword:
+                  type: string
+                  default: 'CA'
+                  example: 'CA'
+                field:
+                  type: string
+                  default: 'ConsigneeState'
+                  example: 'ConsigneeState'
+          exclude:
+            type: array
+            items:
+              type: object
+              properties:
+                keyword:
+                  type: string
+                  default: 'IRVINE'
+                  example: 'IRVINE'
+                field:
+                  type: string
+                  default: 'ConsigneeCity'
+                  example: 'ConsigneeCity'
+          misc:
+            type: array
+            items:
+              type: string
+              default: 'BlankConsigneesExcluded'
+              example: 'BlankConsigneesExcluded'
+          arrivalDates:
+            type: string
+            default: '1534867200-1536192000'
+            example: '1534867200-1536192000'
+          page:
+            type: string
+            default: '1'
+            example: '1'
+          limit:
+            type: string
+            default: '20'
+            example: '20'
+          sortBy:
+            type: string
+            default: '-Shipper'
+            example: '-Shipper'
+      data:
+        description: Search results data
+        type: array
+        items:
+          type: object
+        default:
+          - ArrivalDate: 1493683200
+            BillOfLading: 'SMMBSNGB3090361'
+            BillTypeCode: 'House FROB'
+            CarrierAddress: '780 NOGALES ST STE D'
+            CarrierCity: 'CITY OF INDUSTRY'
+            CarrierCode: 'SMMB'
+            CarrierName: 'SEAMASTER LOGISTICS INC'
+            CarrierState: 'CA'
+            CarrierZip: '91748'
+            Consignee: 'POTATO BARN WARE HOUSE'
+            ConsigneeAddress: '596 E. GERMANN #102 GILBERT AZ 85297 US'
+            ConsigneeAddressBreakdown:
+              PlaceName: 'GILBERT'
+              StateName: 'AZ'
+              ZipCode: '85297'
+              StreetNamePreType: 'GERMANN'
+              CountryName: 'USA'
+              StreetNamePreDirectional: 'EAST'
+              AddressNumber: '596'
+              StreetName: '102'
+            ConsigneeCity: 'GILBERT'
+            ConsigneeId: ''
+            ConsigneeState: 'AZ'
+            ConsigneeStreet: '102'
+            ConsigneeStreetNumber: '596'
+            ConsigneeZipCode: ''
+            ContainerHeight: 900
+            ContainerLength: 4000
+            ContainerNumber: 'TCLU8575822'
+            ContainerType: '40 Foot General Purpose Container, Passive vents at upper part of cargo space'
+            ContainerWidth: 800
+            Containers:
+              - Seal Numbers:
+                  - OOLEDD8903
+                Cargoes:
+                  - Keywords:
+                      - fabric upholstery furniture
+                    Piece Count: '36'
+                    Description: FABRIC UPHOLSTERY FURNITURE
+                Width: '800'
+                Length: '4000'
+                Equipment Description: G1
+                Marks:
+                  - NO MARK
+                Type: '40 Foot General Purpose Container, Passive vents at upper part of cargo space'
+                Load Status: Loaded
+                Type Of Service: House to House
+                Height: '900'
+                Container Number: TCLU8575822
+            CountryOfOrigin: 'China'
+            DestinationPort: 'Long Beach, California'
+            EquipmentDescriptionCode: 'G1'
+            ForeignPort: 'Ningpo'
+            GrossWeightKgs: 2495
+            GrossWeightLbs: 5501
+            HSCode: ''
+            InBondEntryType: ''
+            LoadStatus: 'Loaded'
+            ManifestNumber: '848624'
+            MarksAndNumbers:
+              - 'NO MARK'
+            MasterBillOfLading: 'OOLU2024413930'
+            Measurement: 0
+            MeasurementUnit: 'CM'
+            NotifyParty: ''
+            NotifyPartyAddress: ''
+            NumberOfContainers: 1
+            PlaceOfReceipt: 'NINGBO'
+            ProductDescription: 'FABRIC UPHOLSTERY FURNITURE'
+            ProductKeywords: 'fabric upholstery furniture'
+            Quantity: 36
+            QuantityUnit: 'CTN'
+            SealNumbers:
+              - 'OOLEDD8903'
+            ShipmentId: '95a80457ee9c2919c570040c3b94cc31'
+            Shipper: ''
+            ShipperAddress: ''
+            ShipperId: ''
+            TypeOfService: ''
+            VesselName: 'OOCL UTAH'
+            VoyageNumber: '014E'
+        example:
+          - ArrivalDate: 1493683200
+            BillOfLading: 'SMMBSNGB3090361'
+            BillTypeCode: 'House FROB'
+            CarrierAddress: '780 NOGALES ST STE D'
+            CarrierCity: 'CITY OF INDUSTRY'
+            CarrierCode: 'SMMB'
+            CarrierName: 'SEAMASTER LOGISTICS INC'
+            CarrierState: 'CA'
+            CarrierZip: '91748'
+            Consignee: 'POTATO BARN WARE HOUSE'
+            ConsigneeAddress: '596 E. GERMANN #102 GILBERT AZ 85297 US'
+            ConsigneeAddressBreakdown:
+              PlaceName: 'GILBERT'
+              StateName: 'AZ'
+              ZipCode: '85297'
+              StreetNamePreType: 'GERMANN'
+              CountryName: 'USA'
+              StreetNamePreDirectional: 'EAST'
+              AddressNumber: '596'
+              StreetName: '102'
+            ConsigneeCity: 'GILBERT'
+            ConsigneeId: ''
+            ConsigneeState: 'AZ'
+            ConsigneeStreet: '102'
+            ConsigneeStreetNumber: '596'
+            ConsigneeZipCode: ''
+            ContainerHeight: 900
+            ContainerLength: 4000
+            ContainerNumber: 'TCLU8575822'
+            ContainerType: '40 Foot General Purpose Container, Passive vents at upper part of cargo space'
+            ContainerWidth: 800
+            Containers:
+              - Seal Numbers:
+                  - OOLEDD8903
+                Cargoes:
+                  - Keywords:
+                      - fabric upholstery furniture
+                    Piece Count: '36'
+                    Description: FABRIC UPHOLSTERY FURNITURE
+                Width: '800'
+                Length: '4000'
+                Equipment Description: G1
+                Marks:
+                  - NO MARK
+                Type: '40 Foot General Purpose Container, Passive vents at upper part of cargo space'
+                Load Status: Loaded
+                Type Of Service: House to House
+                Height: '900'
+                Container Number: TCLU8575822
+            CountryOfOrigin: 'China'
+            DestinationPort: 'Long Beach, California'
+            EquipmentDescriptionCode: 'G1'
+            ForeignPort: 'Ningpo'
+            GrossWeightKgs: 2495
+            GrossWeightLbs: 5501
+            HSCode: ''
+            InBondEntryType: ''
+            LoadStatus: 'Loaded'
+            ManifestNumber: '848624'
+            MarksAndNumbers:
+              - 'NO MARK'
+            MasterBillOfLading: 'OOLU2024413930'
+            Measurement: 0
+            MeasurementUnit: 'CM'
+            NotifyParty: ''
+            NotifyPartyAddress: ''
+            NumberOfContainers: 1
+            PlaceOfReceipt: 'NINGBO'
+            ProductDescription: 'FABRIC UPHOLSTERY FURNITURE'
+            ProductKeywords: 'fabric upholstery furniture'
+            Quantity: 36
+            QuantityUnit: 'CTN'
+            SealNumbers:
+              - 'OOLEDD8903'
+            ShipmentId: '95a80457ee9c2919c570040c3b94cc31'
+            Shipper: ''
+            ShipperAddress: ''
+            ShipperId: ''
+            TypeOfService: ''
+            VesselName: 'OOCL UTAH'
+            VoyageNumber: '014E'
+
+  AggregateResponse:
+    type: object
+    description: Response object containing the aggregated count of key words
+    properties:
+      success:
+        type: boolean
+        description: Indicates if the search was successful or not
+        default: true
+        example: true
+      data:
+        type: array
+        description: Object containing the aggregates as properties
+        items:
+          type: object
+          properties:
+            field:
+              type: string
+            totalRefinements:
+              type: number
+            refinements:
+              type: array
+              items:
+                type: object
+                properties:
+                  count:
+                    type: number
+                  name:
+                    type: string
+                  category:
+                    type: string
+        default:
+          - field: DestinationPort
+            totalRefinements: 2
+            refinements:
+              - count: 12
+                name: Los Angeles, California
+                category: Transit Details
+              - count: 5
+                name: Long Beach, California
+                category: Transit Details
+          - field: ConsigneeState
+            totalRefinements: 2
+            refinements:
+              - count: 6
+                name: CA
+                category: Location
+              - count: 2
+                name: NJ
+                category: Location
+        example:
+          - field: DestinationPort
+            totalRefinements: 2
+            refinements:
+              - count: 12
+                name: Los Angeles, California
+                category: Transit Details
+              - count: 5
+                name: Long Beach, California
+                category: Transit Details
+          - field: ConsigneeState
+            totalRefinements: 2
+            refinements:
+              - count: 6
+                name: CA
+                category: Location
+              - count: 2
+                name: NJ
+                category: Location
+
+  SummaryTotal:
+    type: object
+    description: Total shipments of current search
+    properties:
+      no_of_containers:
+        type: integer
+        description: Number of containers
+        default: true
+        example: 500000
+      shipments:
+        type: integer
+        description: Number of shipments
+        default: true
+        example: 1000000
+      weight:
+        type: integer
+        description: Total weight in kg
+        default: true
+        example: 2000000
+
+  SummaryItems:
+    type: array
+    description: Total shipments of current search
+    items:
+      type: object
+      properties:
+        label:
+          type: string
+          description: Daterange of label
+          default: '1537632000 - 1538236799'
+          example: '1537632000 - 1538236799'
+        no_of_containers:
+          type: integer
+          description: Number of containers
+          default: 500000
+          example: 500000
+        shipments:
+          type: integer
+          description: Number of shipments
+          default: 1000000
+          example: 1000000
+        weight:
+          type: integer
+          description: Total weight in kg
+          default: 2000000
+          example: 2000000

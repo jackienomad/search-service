@@ -1,0 +1,22 @@
+keywordSuggestedFieldsMappingArray:
+  Consignee:
+    field: Suggestion
+    index: us_import_consignee
+    type: query
+    search_field: Consignee
+  Shipper:
+    field: Suggestion
+    index: us_import_shipper
+    type: query
+    search_field: Shipper
+  MarksAndNumbers:
+    field: Suggestion
+    index: us_import_marks_and_numbers
+    type: query
+    search_field: MarksAndNumbers
+  ProductKeywords:
+    field: Suggestion
+    index: us_import_product_keywords
+    type: query
+    search_field: ProductDescription
+#shipments_keyword_suggestions_field_mapping_array

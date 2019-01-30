@@ -1,0 +1,10 @@
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /home/isng/apps/search-api/...search-api
+    overwrite: true
+hooks:
+  AfterInstall:
+    - location: lib/codedeploy-after-install.sh
+      timeout: 180

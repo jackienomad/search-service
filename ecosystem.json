@@ -1,0 +1,16 @@
+{
+  "apps": [
+    {
+      "name": "search-api",
+      "script": "npm",
+      "args": "start",
+      "cwd": "/home/isng/apps/search-api/search-api",
+      "exec_mode": "fork_mode",
+      "env_production": {
+        "NODE_ENV": "production",
+        "PORT": 3002,
+        "HOST": "0.0.0.0"
+      }
+    }
+  ]
+}

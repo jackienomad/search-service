@@ -1,0 +1,9 @@
+searchOperators:
+  - and
+  - or
+  - not
+
+searchModifiers:
+  - fuzzy
+  - regular
+  - exact
