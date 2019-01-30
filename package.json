@@ -1,10 +1,10 @@
 {
   "name": "search-service",
   "version": "1.0.0",
-  "description": "Node.js project for IG&#x27;s search APIs",
+  "description": "Node.js search APIs",
   "main": "src/index.js",
   "repository": "",
-  "author": "code-ninja",
+  "author": "jerac dialino",
   "scripts": {
     "test": "NODE_ENV=test NODE_CONFIG_DIR=./src/config/ node -r dotenv/config -r esm ./node_modules/.bin/jest test dotenv_config_path=.env.test --config=jest.config.json",
     "test:focused": "NODE_ENV=test NODE_CONFIG_DIR=./src/config/ node -r dotenv/config -r esm ./node_modules/.bin/jest test/specs/endpoint/search/search.spec.js dotenv_config_path=.env.test --config=jest.config.json",
@@ -30,7 +30,7 @@
     "express": "^4.16.3",
     "git": "^0.1.5",
     "module-alias": "^2.1.0",
-    "query-builder": "git+ssh://git@gitlab.com:importgenius/microservices/query-builder.git#master"
+    "query-builder": "git+ssh://git@github.com/jackienomad/elasticsearch-query-builder.git#master"
   },
   "devDependencies": {
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
